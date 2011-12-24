@@ -11,7 +11,7 @@ class Node(object):
         def __repr__(self):
             return __name__+".Node.T"
 
-        def hash(self):
+        def __hash__(self):
             return 1;
 
     class __FalseNode:
@@ -24,14 +24,14 @@ class Node(object):
         def __repr__(self):
             return __name__+".Node.F"
 
-        def hash(self):
+        def __hash__(self):
             return 0;
 
     T=__TrueNode()
     F=__FalseNode()
 
     def __init__(self,variable,trueNode,falseNode):
-        self.__hash = (hash(variable)+trueNode.hash()-falseNode.hash()) % 0xFFFFFFFF
+        self.__hash = (hash(variable)+hash(trueNode)-hash(falseNode)) % 0xFFFFFFFF
         self.__variable = variable
         self.__trueNode = trueNode
         self.__falseNode = falseNode
@@ -48,7 +48,7 @@ class Node(object):
     def falseNode(self):
         return self.__falseNode
 
-    def hash(self):
+    def __hash__(self):
         return self.__hash
 
     def evaluate(self,variable,value):
