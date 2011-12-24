@@ -6,14 +6,14 @@ class Node(object):
             return self
 
         def __repr__(self):
-            return "Node.T"
+            return __name__+".Node.T"
 
     class __FalseNode:
         def evaluate(self,variable,value):
             return self
 
         def __repr__(self):
-            return "Node.F"
+            return __name__+".Node.F"
 
     T=__TrueNode()
     F=__FalseNode()
@@ -30,9 +30,9 @@ class Node(object):
             else:
                 return self.falseNode
         else:
-            return Node(variable,
-                        trueNode.evaluate(variable,value),
-                        flaseNode.evaluate(variable,value))
+            return Node(self.variable,
+                        self.trueNode.evaluate(variable,value),
+                        self.falseNode.evaluate(variable,value))
 
     def __eq__(self,other):
         if isinstance(other,Node):
@@ -44,10 +44,8 @@ class Node(object):
             return False
 
     def __repr__(self):
-        return "Node(" \
+        return __name__+".Node(" \
             + repr(self.variable) +"," \
             + repr(self.trueNode) +"," \
             + repr(self.falseNode) + ")"
-
-
 
