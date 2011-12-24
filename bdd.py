@@ -12,7 +12,7 @@ class Node(object):
             return __name__+".Node.T"
 
         def hash(self):
-            return 123;
+            return 1;
 
     class __FalseNode:
         def evaluate(self,variable,value):
@@ -25,13 +25,13 @@ class Node(object):
             return __name__+".Node.F"
 
         def hash(self):
-            return -654;
+            return 0;
 
     T=__TrueNode()
     F=__FalseNode()
 
     def __init__(self,variable,trueNode,falseNode):
-        self.__hash = (hash(variable)+trueNode.hash()+falseNode.hash()) % 0xFFFFFFFF
+        self.__hash = (hash(variable)+trueNode.hash()-falseNode.hash()) % 0xFFFFFFFF
         self.variable = variable
         self.trueNode = trueNode
         self.falseNode = falseNode
@@ -57,6 +57,7 @@ class Node(object):
         if isinstance(other,Node):
             return \
                 self is other or (
+                self.__hash == other.__hash and\
                 self.variable == other.variable and\
                 self.trueNode == other.trueNode and\
                 self.falseNode == other.falseNode )
