@@ -11,6 +11,9 @@ class Node(object):
         def __repr__(self):
             return __name__+".Node.T"
 
+        def hash(self):
+            return 123;
+
     class __FalseNode:
         def evaluate(self,variable,value):
             return self
@@ -21,13 +24,20 @@ class Node(object):
         def __repr__(self):
             return __name__+".Node.F"
 
+        def hash(self):
+            return -654;
+
     T=__TrueNode()
     F=__FalseNode()
 
     def __init__(self,variable,trueNode,falseNode):
+        self.__hash = (hash(variable)+trueNode.hash()+falseNode.hash()) % 0xFFFFFFFF
         self.variable = variable
         self.trueNode = trueNode
         self.falseNode = falseNode
+
+    def hash(self):
+        return self.__hash
 
     def evaluate(self,variable,value):
         return self.restrict({ variable : value})
