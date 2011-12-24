@@ -32,9 +32,21 @@ class Node(object):
 
     def __init__(self,variable,trueNode,falseNode):
         self.__hash = (hash(variable)+trueNode.hash()-falseNode.hash()) % 0xFFFFFFFF
-        self.variable = variable
-        self.trueNode = trueNode
-        self.falseNode = falseNode
+        self.__variable = variable
+        self.__trueNode = trueNode
+        self.__falseNode = falseNode
+
+    @property
+    def variable(self):
+        return self.__variable
+
+    @property
+    def trueNode(self):
+        return self.__trueNode
+
+    @property
+    def falseNode(self):
+        return self.__falseNode
 
     def hash(self):
         return self.__hash
