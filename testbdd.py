@@ -58,6 +58,13 @@ class TestNode(unittest.TestCase):
         self.assertEqual(cn1.evaluate('x2',False).evaluate('x1',True),bdd.Node.F)
         self.assertEqual(cn1.evaluate('x2',True).evaluate('x1',False),bdd.Node.F)
         self.assertEqual(cn1.evaluate('x2',False).evaluate('x1',False),bdd.Node.T)
+        self.assertEqual(cn1.restrict({'x1' : True, 'x2' : True}), bdd.Node.T)
+        self.assertEqual(cn1.restrict({'x1' : True, 'x2' : False}), bdd.Node.F)
+        self.assertEqual(cn1.restrict({'x1' : False, 'x2' : True}), bdd.Node.F)
+        self.assertEqual(cn1.restrict({'x1' : False, 'x2' : False}), bdd.Node.T)
+        cn4=bdd.Node('x1',bdd.Node('x1',bdd.Node.T,bdd.Node.F),bdd.Node('x1',bdd.Node.T,bdd.Node.F))
+        self.assertEqual(cn4.evaluate('x1',True),bdd.Node.T)
+        self.assertEqual(cn4.evaluate('x1',False),bdd.Node.F)
 
 if __name__ == '__main__':
     unittest.main()

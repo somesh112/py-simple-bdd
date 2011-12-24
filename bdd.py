@@ -5,11 +5,17 @@ class Node(object):
         def evaluate(self,variable,value):
             return self
 
+        def restrict(self,values):
+            return self
+
         def __repr__(self):
             return __name__+".Node.T"
 
     class __FalseNode:
         def evaluate(self,variable,value):
+            return self
+
+        def restrict(self,values):
             return self
 
         def __repr__(self):
@@ -24,22 +30,26 @@ class Node(object):
         self.falseNode = falseNode
 
     def evaluate(self,variable,value):
-        if self.variable == variable:
-            if value:
-                return self.trueNode
+        return self.restrict({ variable : value})
+
+    def restrict(self,values):
+        if self.variable in values:
+            if values[self.variable]:
+                return self.trueNode.restrict(values)
             else:
-                return self.falseNode
+                return self.falseNode.restrict(values)
         else:
             return Node(self.variable,
-                        self.trueNode.evaluate(variable,value),
-                        self.falseNode.evaluate(variable,value))
+                        self.trueNode.restrict(values),
+                        self.falseNode.restrict(values))
 
     def __eq__(self,other):
         if isinstance(other,Node):
             return \
+                self is other or (
                 self.variable == other.variable and\
                 self.trueNode == other.trueNode and\
-                self.falseNode == other.falseNode
+                self.falseNode == other.falseNode )
         else:
             return False
 
