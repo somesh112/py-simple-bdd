@@ -37,5 +37,27 @@ class TestNode(unittest.TestCase):
         n5=bdd.Node('x1',bdd.Node.F,bdd.Node.F)
         self.assertNotEqual(n1,n5)
 
+    def testNestedNode(self):
+        n1=bdd.Node('x1',bdd.Node.T,bdd.Node.F)
+        n2=bdd.Node('x1',bdd.Node.F,bdd.Node.T)
+        n3=bdd.Node('x1',bdd.Node.T,bdd.Node.F)
+        cn1=bdd.Node('x2',n1,n2)
+        cn2=bdd.Node('x2',n2,n1)
+        cn3=bdd.Node('x2',n3,n2)
+        self.assertEqual(cn1,cn1)
+        self.assertNotEqual(cn1,cn2)
+        self.assertEqual(cn1,cn3)
+        self.assertEqual(cn1,eval(repr(cn1)))
+        self.assertEqual(cn1.evaluate('x2',True),n1)
+        self.assertEqual(cn1.evaluate('x2',False),n2)
+        self.assertEqual(cn1.evaluate('x1',True).evaluate('x2',True),bdd.Node.T)
+        self.assertEqual(cn1.evaluate('x1',True).evaluate('x2',False),bdd.Node.F)
+        self.assertEqual(cn1.evaluate('x1',False).evaluate('x2',True),bdd.Node.F)
+        self.assertEqual(cn1.evaluate('x1',False).evaluate('x2',False),bdd.Node.T)
+        self.assertEqual(cn1.evaluate('x2',True).evaluate('x1',True),bdd.Node.T)
+        self.assertEqual(cn1.evaluate('x2',False).evaluate('x1',True),bdd.Node.F)
+        self.assertEqual(cn1.evaluate('x2',True).evaluate('x1',False),bdd.Node.F)
+        self.assertEqual(cn1.evaluate('x2',False).evaluate('x1',False),bdd.Node.T)
+
 if __name__ == '__main__':
     unittest.main()
