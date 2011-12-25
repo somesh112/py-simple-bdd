@@ -18,12 +18,6 @@
 class Node(object):
 
     class __TrueNode:
-        def evaluate(self,variable,value):
-            return self
-
-        def restrict(self,values):
-            return self
-
         def __repr__(self):
             return __name__+".Node.T"
 
@@ -31,12 +25,6 @@ class Node(object):
             return 1;
 
     class __FalseNode:
-        def evaluate(self,variable,value):
-            return self
-
-        def restrict(self,values):
-            return self
-
         def __repr__(self):
             return __name__+".Node.F"
 
@@ -66,20 +54,6 @@ class Node(object):
 
     def __hash__(self):
         return self.__hash
-
-    def evaluate(self,variable,value):
-        return self.restrict({ variable : value})
-
-    def restrict(self,values):
-        if self.variable in values:
-            if values[self.variable]:
-                return self.trueNode.restrict(values)
-            else:
-                return self.falseNode.restrict(values)
-        else:
-            return Node(self.variable,
-                        self.trueNode.restrict(values),
-                        self.falseNode.restrict(values))
 
     def __eq__(self,other):
         if isinstance(other,Node):
@@ -128,3 +102,50 @@ def countPhysicalNodes(aNode):
     cache=set()
     cn(aNode,cache)
     return len(cache)
+
+def removeRedundant(aNode):
+    """Return a new BDD with redundant nodes removed
+    a node is redundant if falseNode == trueNode"""
+    def r(aNode,cache):
+        if aNode in cache:
+            return cache[aNode]
+        else:
+            result=None
+            t=r(aNode.trueNode,cache)
+            f=r(aNode.falseNode,cache)
+            if ( t == f ):
+                result=t
+            else:
+                result=Node(aNode.variable,t,f)
+            cache[aNode]=result
+            return result
+    return r(aNode,dict({ Node.T : Node.T,
+                          Node.F : Node.F}))
+
+def restrict(aNode,assignments):
+    """Return a new BDD which is logically equivalent to aNode
+    with variables restricted to the values in the map assignments"""
+    def r(aNode,assignments,cache):
+        if aNode in cache:
+            return cache[aNode]
+        else:
+            result=None
+            if aNode.variable in assignments:
+                if assignments[aNode.variable]:
+                    result=r(aNode.trueNode,assignments,cache)
+                else:
+                    result=r(aNode.falseNode,assignments,cache)
+            else:
+                result=Node(aNode.variable,
+                            r(aNode.trueNode,assignments,cache),
+                            r(aNode.falseNode,assignments,cache))
+            cache[aNode]=result
+            return result
+    return r(aNode,assignments,dict({ Node.T : Node.T,
+                                      Node.F : Node.F}))
+
+def evaluate(aNode,variable,value):
+    return restrict(aNode,{variable:value})
+
+def makePhysicalFromLogical(aNode):
+    return restrict(aNode,{})
