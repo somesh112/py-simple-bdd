@@ -101,3 +101,30 @@ class Node(object):
             + repr(self.trueNode) +"," \
             + repr(self.falseNode) + ")"
 
+def countLogicalNodes(aNode):
+    """Returns the number of logical (==) nodes in the BDD"""
+    def cn(aNode,cache):
+        if aNode in cache:
+            pass
+        else:
+            if isinstance(aNode,Node):
+                cn(aNode.trueNode,cache)
+                cn(aNode.falseNode,cache)
+            cache.add(aNode)
+    cache=set()
+    cn(aNode,cache)
+    return len(cache)
+
+def countPhysicalNodes(aNode):
+    """Returns the number of physical (id) nodes in the BDD"""
+    def cn(aNode,cache):
+        if id(aNode) in cache:
+            pass
+        else:
+            if isinstance(aNode,Node):
+                cn(aNode.trueNode,cache)
+                cn(aNode.falseNode,cache)
+            cache.add(id(aNode))
+    cache=set()
+    cn(aNode,cache)
+    return len(cache)

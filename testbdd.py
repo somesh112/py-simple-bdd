@@ -40,6 +40,8 @@ class TestNode(unittest.TestCase):
 
     def testSingleNode(self):
         n1=bdd.Node('x1',bdd.Node.T,bdd.Node.F)
+        self.assertEqual(bdd.countPhysicalNodes(n1),3)
+        self.assertEqual(bdd.countLogicalNodes(n1),3)
         self.assertEqual(n1,n1)
         self.assertEqual(n1,eval(repr(n1)))
         self.assertEqual(hash(n1),hash(eval(repr(n1))))
@@ -50,6 +52,8 @@ class TestNode(unittest.TestCase):
         self.assertNotEqual(n1,n2)
         n3=bdd.Node('x1',bdd.Node.T,bdd.Node.T)
         self.assertNotEqual(n1,n3)
+        self.assertEqual(bdd.countPhysicalNodes(n3),2)
+        self.assertEqual(bdd.countLogicalNodes(n3),2)
         n4=bdd.Node('x1',bdd.Node.F,bdd.Node.T)
         self.assertNotEqual(n1,n4)
         n5=bdd.Node('x1',bdd.Node.F,bdd.Node.F)
@@ -65,6 +69,8 @@ class TestNode(unittest.TestCase):
         self.assertEqual(cn1,cn1)
         self.assertNotEqual(cn1,cn2)
         self.assertEqual(cn1,cn3)
+        self.assertEqual(bdd.countLogicalNodes(cn1),5)
+        self.assertEqual(bdd.countPhysicalNodes(cn1),5)
         self.assertEqual(hash(cn1),hash(cn3))
         self.assertEqual(cn1,eval(repr(cn1)))
         self.assertEqual(cn1.evaluate('x2',True),n1)
@@ -84,6 +90,8 @@ class TestNode(unittest.TestCase):
         cn4=bdd.Node('x1',bdd.Node('x1',bdd.Node.T,bdd.Node.F),bdd.Node('x1',bdd.Node.T,bdd.Node.F))
         self.assertEqual(cn4.evaluate('x1',True),bdd.Node.T)
         self.assertEqual(cn4.evaluate('x1',False),bdd.Node.F)
+        self.assertEqual(bdd.countPhysicalNodes(cn4),5)
+        self.assertEqual(bdd.countLogicalNodes(cn4),4)
 
 if __name__ == '__main__':
     unittest.main()
