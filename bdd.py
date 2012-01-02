@@ -77,42 +77,44 @@ class Node(object):
 
 def countLogicalNodes(aNode):
     """Returns the number of logical (==) nodes in the BDD"""
-    def cn(aNode,cache):
+    cache=set()
+    def cn(aNode):
         if aNode in cache:
             pass
         else:
             if isinstance(aNode,Node):
-                cn(aNode.trueNode,cache)
-                cn(aNode.falseNode,cache)
+                cn(aNode.trueNode)
+                cn(aNode.falseNode)
             cache.add(aNode)
-    cache=set()
-    cn(aNode,cache)
+    cn(aNode)
     return len(cache)
 
 def countPhysicalNodes(aNode):
     """Returns the number of physical (id) nodes in the BDD"""
-    def cn(aNode,cache):
+    cache=set()
+    def cn(aNode):
         if id(aNode) in cache:
             pass
         else:
             if isinstance(aNode,Node):
-                cn(aNode.trueNode,cache)
-                cn(aNode.falseNode,cache)
+                cn(aNode.trueNode)
+                cn(aNode.falseNode)
             cache.add(id(aNode))
-    cache=set()
-    cn(aNode,cache)
+    cn(aNode)
     return len(cache)
 
 def removeRedundant(aNode):
     """Return a new BDD with redundant nodes removed
     a node is redundant if falseNode == trueNode"""
-    def r(aNode,cache):
+    cache=dict({ Node.T : Node.T,
+                 Node.F : Node.F})
+    def r(aNode):
         if aNode in cache:
             return cache[aNode]
         else:
             result=None
-            t=r(aNode.trueNode,cache)
-            f=r(aNode.falseNode,cache)
+            t=r(aNode.trueNode)
+            f=r(aNode.falseNode)
             if ( t == f ):
                 result=t
             else:
@@ -123,25 +125,26 @@ def removeRedundant(aNode):
                     result=Node(aNode.variable,t,f)
             cache[aNode]=result
             return result
-    return r(aNode,dict({ Node.T : Node.T,
-                          Node.F : Node.F}))
+    return r(aNode)
 
 def restrict(aNode,assignments):
     """Return a new BDD which is logically equivalent to aNode
     with variables restricted to the values in the map assignments"""
-    def r(aNode,assignments,cache):
+    cache=dict({ Node.T : Node.T,
+                 Node.F : Node.F})
+    def r(aNode):
         if aNode in cache:
             return cache[aNode]
         else:
             result=None
             if aNode.variable in assignments:
                 if assignments[aNode.variable] or assignments[aNode.variable] == Node.T:
-                    result=r(aNode.trueNode,assignments,cache)
+                    result=r(aNode.trueNode)
                 else:
-                    result=r(aNode.falseNode,assignments,cache)
+                    result=r(aNode.falseNode)
             else:
-                t=r(aNode.trueNode,assignments,cache)
-                f=r(aNode.falseNode,assignments,cache)
+                t=r(aNode.trueNode)
+                f=r(aNode.falseNode)
                 if ( id(t) == id(aNode.trueNode) and
                      id(f) == id(aNode.falseNode) ):
                     result=aNode
@@ -149,8 +152,7 @@ def restrict(aNode,assignments):
                     result=Node(aNode.variable,t,f)
             cache[aNode]=result
             return result
-    return r(aNode,assignments,dict({ Node.T : Node.T,
-                                      Node.F : Node.F}))
+    return r(aNode)
 
 def evaluate(aNode,variable,value):
     return restrict(aNode,{variable:value})
@@ -177,7 +179,8 @@ def getTerminal(value):
 
 def negate(aNode):
     """Returns a BDD that is the negation of aNode"""
-    def n(aNode,cache):
+    cache=dict()
+    def n(aNode):
         if aNode == Node.T:
             return Node.F
         elif aNode == Node.F:
@@ -185,8 +188,8 @@ def negate(aNode):
         elif aNode in cache:
             return cache[aNode]
         else:
-            t=n(aNode.trueNode,cache)
-            f=n(aNode.falseNode,cache)
+            t=n(aNode.trueNode)
+            f=n(aNode.falseNode)
             if id(t) == id(aNode.trueNode) and \
                     id(f) == id(aNode.falseNode):
                 r=aNode
@@ -194,7 +197,7 @@ def negate(aNode):
                 r=Node(aNode.variable,t,f)
             cache[aNode]=r
             return r
-    return n(aNode,{})
+    return n(aNode)
 
 def variable(v):
     return Node(v,Node.T,Node.F)
