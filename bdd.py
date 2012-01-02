@@ -135,7 +135,7 @@ def restrict(aNode,assignments):
         else:
             result=None
             if aNode.variable in assignments:
-                if assignments[aNode.variable]:
+                if assignments[aNode.variable] or assignments[aNode.variable] == Node.T:
                     result=r(aNode.trueNode,assignments,cache)
                 else:
                     result=r(aNode.falseNode,assignments,cache)
@@ -195,3 +195,84 @@ def negate(aNode):
             cache[aNode]=r
             return r
     return n(aNode,{})
+
+def variable(v):
+    return Node(v,Node.T,Node.F)
+
+def notVariable(v):
+    return Node(v,Node.F,Node.T)
+
+def conjunction(variables):
+    """Form a bdd that is the true iff all of the variables are true.
+    the bdd has the variables in the same order as in the iteration.
+
+    >>> bdd.conjunction(['x','y','z'])
+    bdd.Node('x',bdd.Node('y',bdd.Node('z',bdd.Node.T,bdd.Node.F),bdd.Node.F),bdd.Node.F)"""
+    def c(i):
+        try:
+            return Node(next(i),c(i),Node.F)
+        except StopIteration:
+            return Node.T
+    return c(iter(variables))
+
+def disjunction(variables):
+    """Form a bdd that is the false iff all of the variables are false.
+    the bdd has the variables in the same order as in the iteration.
+
+    >>> bdd.disjunction(['x','y','z'])
+    bdd.Node('x',bdd.Node.T,bdd.Node('y',bdd.Node.T,bdd.Node('z',bdd.Node.T,bdd.Node.F)))"""
+    def d(i):
+        try:
+            return Node(next(i),Node.T,d(i))
+        except StopIteration:
+            return Node.F
+    return d(iter(variables))
+
+def andOperation(v1,v2):
+    if v1 == Node.T:
+        return v2
+    else:
+        return Node.F
+
+def orOperation(v1,v2):
+    if v1 == Node.T:
+        return Node.T
+    else:
+        return v2
+
+def leftistOrdering(x,y):
+    return True
+
+def rightistOrdering(x,y):
+    return False
+
+def enumeratedVariablesOrdering(variables):
+    resultSet=set()
+    l=list(variables)
+    for i in range(0,len(l)):
+        for j in range(i+1,len(l)):
+            resultSet.add((l[i],l[j]))
+    def o(n1,n2):
+        return (n1.variable,n2.variable) in resultSet
+    return o
+
+def apply(node1,node2,binaryOperation,nodeOrdering = leftistOrdering):
+    if isTerminal(node1) and isTerminal(node2):
+        return binaryOperation(node1,node2)
+    else:
+        if isTerminal(node2) or nodeOrdering(node1,node2):
+            return Node(node1.variable,
+                        apply(evaluate(node1.trueNode,node1.variable,True),
+                              evaluate(node2,node1.variable,True),
+                              binaryOperation),
+                        apply(evaluate(node1.falseNode,node1.variable,False),
+                              evaluate(node2,node1.variable,False),
+                              binaryOperation))
+        else:
+            return Node(node2.variable,
+                        apply(evaluate(node2.trueNode,node2.variable,True),
+                              evaluate(node1,node2.variable,True),
+                              binaryOperation),
+                        apply(evaluate(node2.falseNode,node2.variable,False),
+                              evaluate(node1,node2.variable,False),
+                              binaryOperation))
