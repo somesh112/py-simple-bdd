@@ -116,7 +116,11 @@ def removeRedundant(aNode):
             if ( t == f ):
                 result=t
             else:
-                result=Node(aNode.variable,t,f)
+                if ( id(t) == id(aNode.trueNode) and
+                     id(f) == id(aNode.falseNode) ):
+                    result=aNode
+                else:
+                    result=Node(aNode.variable,t,f)
             cache[aNode]=result
             return result
     return r(aNode,dict({ Node.T : Node.T,
@@ -136,9 +140,13 @@ def restrict(aNode,assignments):
                 else:
                     result=r(aNode.falseNode,assignments,cache)
             else:
-                result=Node(aNode.variable,
-                            r(aNode.trueNode,assignments,cache),
-                            r(aNode.falseNode,assignments,cache))
+                t=r(aNode.trueNode,assignments,cache)
+                f=r(aNode.falseNode,assignments,cache)
+                if ( id(t) == id(aNode.trueNode) and
+                     id(f) == id(aNode.falseNode) ):
+                    result=aNode
+                else:
+                    result=Node(aNode.variable,t,f)
             cache[aNode]=result
             return result
     return r(aNode,assignments,dict({ Node.T : Node.T,
