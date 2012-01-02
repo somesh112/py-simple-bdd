@@ -129,5 +129,17 @@ class TestNode(unittest.TestCase):
         self.assertTrue(v1(bdd.variable('x2'),bdd.variable('x4')))
         self.assertFalse(v1(bdd.variable('x3'),bdd.variable('x2')))
 
+    def testSimple(self):
+        self.assertEqual(bdd.variable('x'),bdd.Node('x',bdd.Node.T,bdd.Node.F))
+        self.assertEqual(bdd.notVariable('x'),bdd.Node('x',bdd.Node.F,bdd.Node.T))
+        self.assertEqual(bdd.conjunction([]),bdd.Node.T)
+        self.assertEqual(bdd.conjunction(['x']),bdd.variable('x'))
+        self.assertEqual(bdd.conjunction(['x','y']),bdd.Node('x',bdd.variable('y'),bdd.Node.F))
+        self.assertEqual(bdd.conjunction(['x','y','z']),bdd.Node('x',bdd.Node('y',bdd.Node('z',bdd.Node.T,bdd.Node.F),bdd.Node.F),bdd.Node.F))
+        self.assertEqual(bdd.disjunction([]),bdd.Node.F)
+        self.assertEqual(bdd.disjunction(['x']),bdd.variable('x'))
+        self.assertEqual(bdd.disjunction(['x','y']),bdd.Node('x',bdd.Node.T,bdd.variable('y')))
+        self.assertEqual(bdd.disjunction(['x','y','z']),bdd.Node('x',bdd.Node.T,bdd.Node('y',bdd.Node.T,bdd.Node('z',bdd.Node.T,bdd.Node.F))))
+
 if __name__ == '__main__':
     unittest.main()
