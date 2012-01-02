@@ -240,11 +240,23 @@ def orOperation(v1,v2):
     else:
         return v2
 
-def leftistOrdering(x,y):
-    return True
+def extendOrderingToTerminals(ordering):
+    """Extend an ordering between Nodes defined by ordering,
+    to include Node.T an Node.F such that,
+    Node < Node.T < Node.F"""
+    def r(x,y):
+        if y is Node.F:
+            return True
+        elif y is Node.T:
+            return not x is Node.F
+        elif isTerminal(x):
+            return False
+        else:
+            return ordering(x,y)
+    return r
 
-def rightistOrdering(x,y):
-    return False
+leftistOrdering=extendOrderingToTerminals(lambda x,y: True)
+rightistOrdering=extendOrderingToTerminals(lambda x,y: False)
 
 def enumeratedVariablesOrdering(variables):
     resultSet=set()
@@ -254,13 +266,13 @@ def enumeratedVariablesOrdering(variables):
             resultSet.add((l[i],l[j]))
     def o(n1,n2):
         return (n1.variable,n2.variable) in resultSet
-    return o
+    return extendOrderingToTerminals(o)
 
 def apply(node1,node2,binaryOperation,nodeOrdering = leftistOrdering):
     if isTerminal(node1) and isTerminal(node2):
         return binaryOperation(node1,node2)
     else:
-        if isTerminal(node2) or nodeOrdering(node1,node2):
+        if nodeOrdering(node1,node2):
             return Node(node1.variable,
                         apply(evaluate(node1.trueNode,node1.variable,True),
                               evaluate(node2,node1.variable,True),
