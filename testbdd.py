@@ -111,7 +111,7 @@ class TestNode(unittest.TestCase):
         self.assertEqual(bdd.negate(bdd.negate(cn1)),cn1)
         self.assertNotEqual(bdd.negate(cn1),cn1)
 
-    def allOrderings(self,ordering):
+    def __allOrderings(self,ordering):
         self.assertTrue(ordering(bdd.Node.T,bdd.Node.F))
         self.assertFalse(ordering(bdd.Node.F,bdd.Node.T))
         self.assertTrue(ordering(None,bdd.Node.F))
@@ -120,12 +120,12 @@ class TestNode(unittest.TestCase):
         self.assertFalse(ordering(bdd.Node.F,None))
 
     def testOrderings(self):
-        self.allOrderings(bdd.leftistOrdering)
+        self.__allOrderings(bdd.leftistOrdering)
         self.assertTrue(bdd.leftistOrdering(None,None))
-        self.allOrderings(bdd.rightistOrdering)
+        self.__allOrderings(bdd.rightistOrdering)
         self.assertFalse(bdd.rightistOrdering(None,None))
         v1=bdd.enumeratedVariablesOrdering(['x1','x2','x3','x4'])
-        self.allOrderings(v1)
+        self.__allOrderings(v1)
         self.assertTrue(v1(bdd.variable('x2'),bdd.variable('x4')))
         self.assertFalse(v1(bdd.variable('x3'),bdd.variable('x2')))
 
