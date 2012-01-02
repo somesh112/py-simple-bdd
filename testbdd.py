@@ -30,6 +30,10 @@ class TestNode(unittest.TestCase):
         self.assertEqual(bdd.Node.T,eval(repr(bdd.Node.T)))
         self.assertEqual(bdd.evaluate(bdd.Node.T,'a variable',False),bdd.Node.T)
         self.assertEqual(bdd.evaluate(bdd.Node.T,'a variable',True),bdd.Node.T)
+        self.assertTrue(bdd.isTerminal(bdd.Node.T))
+        self.assertEqual(bdd.getTerminal(True),bdd.Node.T)
+        self.assertEqual(bdd.getTerminal(['x']),bdd.Node.T)
+        self.assertEqual(bdd.negate(bdd.Node.T),bdd.Node.F)
 
     def testFalse(self):
         self.assertEqual(bdd.Node.F,bdd.Node.F)
@@ -37,9 +41,14 @@ class TestNode(unittest.TestCase):
         self.assertEqual(bdd.Node.F,eval(repr(bdd.Node.F)))
         self.assertEqual(bdd.evaluate(bdd.Node.F,'a variable',False),bdd.Node.F)
         self.assertEqual(bdd.evaluate(bdd.Node.F,'a variable',True),bdd.Node.F)
+        self.assertTrue(bdd.isTerminal(bdd.Node.F))
+        self.assertEqual(bdd.getTerminal(False),bdd.Node.F)
+        self.assertEqual(bdd.getTerminal([]),bdd.Node.F)
+        self.assertEqual(bdd.negate(bdd.Node.F),bdd.Node.T)
 
     def testSingleNode(self):
         n1=bdd.Node('x1',bdd.Node.T,bdd.Node.F)
+        self.assertFalse(bdd.isTerminal(n1))
         self.assertEqual(bdd.countPhysicalNodes(n1),3)
         self.assertEqual(bdd.countLogicalNodes(n1),3)
         self.assertEqual(n1,n1)
@@ -91,10 +100,16 @@ class TestNode(unittest.TestCase):
         cn4=bdd.Node('x1',bdd.Node('x1',bdd.Node.T,bdd.Node.F),bdd.Node('x1',bdd.Node.T,bdd.Node.F))
         self.assertEqual(bdd.evaluate(cn4,'x1',True),bdd.Node.T)
         self.assertEqual(bdd.evaluate(cn4,'x1',False),bdd.Node.F)
+        self.assertEqual(bdd.evaluate(bdd.negate(cn4),'x1',True),bdd.Node.F)
+        self.assertEqual(bdd.evaluate(bdd.negate(cn4),'x1',False),bdd.Node.T)
         self.assertEqual(bdd.countPhysicalNodes(cn4),5)
         self.assertEqual(bdd.countLogicalNodes(cn4),4)
         self.assertEqual(bdd.countPhysicalNodes(bdd.restrict(cn4,{})),4)
         self.assertEqual(bdd.removeRedundant(cn4),bdd.Node('x1',bdd.Node.T,bdd.Node.F))
+        self.assertEqual(bdd.negate(n1),n2)
+        self.assertEqual(bdd.negate(n2),n1)
+        self.assertEqual(bdd.negate(bdd.negate(cn1)),cn1)
+        self.assertNotEqual(bdd.negate(cn1),cn1)
 
 if __name__ == '__main__':
     unittest.main()

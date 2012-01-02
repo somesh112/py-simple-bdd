@@ -157,3 +157,41 @@ def evaluate(aNode,variable,value):
 
 def makePhysicalFromLogical(aNode):
     return restrict(aNode,{})
+
+def simplify(aNode):
+    """simply removeRedundant(makePhysicalFromLogical())"""
+    return removeRedundant(makePhysicalFromLogical(aNode))
+
+def isTerminal(aNode):
+    """Tests if aNode is Node.T or Node.F"""
+    return \
+        aNode == Node.T or \
+        aNode == Node.F
+
+def getTerminal(value):
+    """Returns the terminal corresponding to the boolean interpretation of value"""
+    if value:
+        return Node.T
+    else:
+        return Node.F
+
+def negate(aNode):
+    """Returns a BDD that is the negation of aNode"""
+    def n(aNode,cache):
+        if aNode == Node.T:
+            return Node.F
+        elif aNode == Node.F:
+            return Node.T
+        elif aNode in cache:
+            return cache[aNode]
+        else:
+            t=n(aNode.trueNode,cache)
+            f=n(aNode.falseNode,cache)
+            if id(t) == id(aNode.trueNode) and \
+                    id(f) == id(aNode.falseNode):
+                r=aNode
+            else:
+                r=Node(aNode.variable,t,f)
+            cache[aNode]=r
+            return r
+    return n(aNode,{})
