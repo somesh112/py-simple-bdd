@@ -75,6 +75,10 @@ class Node(object):
             + repr(self.trueNode) +"," \
             + repr(self.falseNode) + ")"
 
+def createDefaultCache():
+    return dict({Node.T : Node.T,
+                 Node.F : Node.F})
+
 def countLogicalNodes(aNode):
     """Returns the number of logical (==) nodes in the BDD"""
     cache=set()
@@ -103,11 +107,11 @@ def countPhysicalNodes(aNode):
     cn(aNode)
     return len(cache)
 
-def removeRedundant(aNode):
+def removeRedundant(aNode,cache=()):
     """Return a new BDD with redundant nodes removed
     a node is redundant if falseNode == trueNode"""
-    cache=dict({ Node.T : Node.T,
-                 Node.F : Node.F})
+    if cache==():
+        cache=createDefaultCache()
     def r(aNode):
         if aNode in cache:
             return cache[aNode]
@@ -127,11 +131,11 @@ def removeRedundant(aNode):
             return result
     return r(aNode)
 
-def restrict(aNode,assignments):
+def restrict(aNode,assignments,cache=()):
     """Return a new BDD which is logically equivalent to aNode
     with variables restricted to the values in the map assignments"""
-    cache=dict({ Node.T : Node.T,
-                 Node.F : Node.F})
+    if cache==():
+        cache=createDefaultCache()
     def r(aNode):
         if aNode in cache:
             return cache[aNode]
@@ -154,8 +158,8 @@ def restrict(aNode,assignments):
             return result
     return r(aNode)
 
-def evaluate(aNode,variable,value):
-    return restrict(aNode,{variable:value})
+def evaluate(aNode,variable,value,cache=()):
+    return restrict(aNode,{variable:value},cache)
 
 def makePhysicalFromLogical(aNode):
     return restrict(aNode,{})
@@ -204,6 +208,9 @@ def variable(v):
 
 def notVariable(v):
     return Node(v,Node.F,Node.T)
+
+def redundantVariable(v,value):
+    return Node(v,value,value)
 
 def conjunction(variables):
     """Form a bdd that is the true iff all of the variables are true.
@@ -271,23 +278,22 @@ def enumeratedVariablesOrdering(variables):
         return (n1.variable,n2.variable) in resultSet
     return extendOrderingToTerminals(o)
 
-def apply(node1,node2,binaryOperation,nodeOrdering = leftistOrdering):
-    if isTerminal(node1) and isTerminal(node2):
-        return binaryOperation(node1,node2)
-    else:
-        if nodeOrdering(node1,node2):
-            return Node(node1.variable,
-                        apply(evaluate(node1.trueNode,node1.variable,True),
-                              evaluate(node2,node1.variable,True),
-                              binaryOperation),
-                        apply(evaluate(node1.falseNode,node1.variable,False),
-                              evaluate(node2,node1.variable,False),
-                              binaryOperation))
+def apply(n1,n2,binaryOperation,nodeOrdering = leftistOrdering):
+    cache=createDefaultCache();
+    def r(node1,node2):
+        if isTerminal(node1) and isTerminal(node2):
+            return binaryOperation(node1,node2)
         else:
-            return Node(node2.variable,
-                        apply(evaluate(node2.trueNode,node2.variable,True),
-                              evaluate(node1,node2.variable,True),
-                              binaryOperation),
-                        apply(evaluate(node2.falseNode,node2.variable,False),
-                              evaluate(node1,node2.variable,False),
-                              binaryOperation))
+            if nodeOrdering(node1,node2):
+                return Node(node1.variable,
+                            r(evaluate(node1.trueNode,node1.variable,True,cache),
+                              evaluate(node2,node1.variable,True,cache)),
+                            r(evaluate(node1.falseNode,node1.variable,False,cache),
+                              evaluate(node2,node1.variable,False,cache)))
+            else:
+                return Node(node2.variable,
+                            r(evaluate(node2.trueNode,node2.variable,True,cache),
+                              evaluate(node1,node2.variable,True,cache)),
+                            r(evaluate(node2.falseNode,node2.variable,False,cache),
+                              evaluate(node1,node2.variable,False,cache)))
+    return simplify(r(n1,n2))

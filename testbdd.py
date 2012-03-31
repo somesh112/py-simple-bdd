@@ -129,6 +129,13 @@ class TestNode(unittest.TestCase):
         self.assertTrue(v1(bdd.variable('x2'),bdd.variable('x4')))
         self.assertFalse(v1(bdd.variable('x3'),bdd.variable('x2')))
 
+    def testSimplify(self):
+        v1=bdd.Node('x1',
+                    bdd.redundantVariable('x2',bdd.Node.T),
+                    bdd.redundantVariable('x2',bdd.Node.T)
+                    )
+        self.assertEqual(id(bdd.simplify(v1)),id(bdd.Node.T))
+
     def testSimple(self):
         self.assertEqual(bdd.variable('x'),bdd.Node('x',bdd.Node.T,bdd.Node.F))
         self.assertEqual(bdd.notVariable('x'),bdd.Node('x',bdd.Node.F,bdd.Node.T))
@@ -140,6 +147,13 @@ class TestNode(unittest.TestCase):
         self.assertEqual(bdd.disjunction(['x']),bdd.variable('x'))
         self.assertEqual(bdd.disjunction(['x','y']),bdd.Node('x',bdd.Node.T,bdd.variable('y')))
         self.assertEqual(bdd.disjunction(['x','y','z']),bdd.Node('x',bdd.Node.T,bdd.Node('y',bdd.Node.T,bdd.Node('z',bdd.Node.T,bdd.Node.F))))
+
+    def testApply(self):
+        v1=bdd.variable('v1')
+        v2=bdd.variable('v2')
+        v1dv2=bdd.disjunction(['v1','v2'])
+        v1av2=bdd.simplify(bdd.apply(v1,v2,bdd.orOperation,bdd.enumeratedVariablesOrdering(['v1','v2'])))
+        self.assertEqual(v1dv2,v1av2)
 
 if __name__ == '__main__':
     unittest.main()
